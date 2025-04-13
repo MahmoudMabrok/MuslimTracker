@@ -1,15 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-
-type FajrEntry = {
-  id?: number;
-  prayed: boolean;
-  date: Date;
-};
+import { useFajrEntry, useCreateFajrEntry } from '@/hooks/useLocalStorage';
+import { FajrEntry } from '@/types/schema';
 
 export default function FajrTracker() {
   const { toast } = useToast();
@@ -17,9 +12,7 @@ export default function FajrTracker() {
   const [fajrPrayed, setFajrPrayed] = useState(false);
 
   // Query for today's Fajr status
-  const { data: fajrEntry, isLoading } = useQuery<FajrEntry>({
-    queryKey: ['/api/fajr-entries'],
-  });
+  const { data: fajrEntry, isLoading } = useFajrEntry();
 
   // Update state when data is fetched
   useEffect(() => {
@@ -29,35 +22,11 @@ export default function FajrTracker() {
   }, [fajrEntry]);
 
   // Toggle Fajr prayer status
-  const fajrMutation = useMutation({
-    mutationFn: (prayed: boolean) => 
-      apiRequest('POST', '/api/fajr-entries', { prayed, date: new Date() })
-        .then(res => res.json()),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/fajr-entries'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/streaks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/achievements'] });
-      
-      toast({
-        title: "Success!",
-        description: fajrPrayed 
-          ? "Alhamdulillah! You've recorded your Fajr prayer." 
-          : "Fajr prayer status updated.",
-      });
-    },
-    onError: (error: Error) => {
-      setFajrPrayed(!fajrPrayed); // Revert UI state on error
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update Fajr prayer status.",
-        variant: "destructive",
-      });
-    },
-  });
+  const fajrMutation = useCreateFajrEntry();
 
   const handleToggle = (checked: boolean) => {
     setFajrPrayed(checked);
-    fajrMutation.mutate(checked);
+    fajrMutation.mutate({ prayed: checked, userId: 1 });
   };
 
   return (

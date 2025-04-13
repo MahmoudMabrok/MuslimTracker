@@ -5,6 +5,7 @@ import DateDisplay from '@/components/DateDisplay';
 import QuranTracker from '@/components/QuranTracker';
 import FajrTracker from '@/components/FajrTracker';
 import StreakSummary from '@/components/StreakSummary';
+import WeekOverview from '@/components/WeekOverview';
 
 export default function TrackerPage() {
   return (
@@ -15,6 +16,7 @@ export default function TrackerPage() {
         <Navigation />
         
         <DateDisplay />
+        <WeekOverview />
         <QuranTracker />
         <FajrTracker />
         <StreakSummary />

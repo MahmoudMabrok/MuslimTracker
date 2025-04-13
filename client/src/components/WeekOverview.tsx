@@ -1,21 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
-
-type DailySummary = {
-  date: string;
-  totalPages: number;
-  fajrPrayed: boolean;
-  entries: any[];
-};
+import { useWeeklySummary } from '@/hooks/useLocalStorage';
+import { DailySummary } from '@/types/schema';
 
 export default function WeekOverview() {
-  const { data: weekData = [], isLoading } = useQuery<DailySummary[]>({
-    queryKey: ['/api/weekly-summary'],
-  });
+  const { data: weekData = [], isLoading } = useWeeklySummary();
 
   // Format day name and date
-  const formatDayInfo = (dateStr: string) => {
-    const date = new Date(dateStr);
+  const formatDayInfo = (date: Date) => {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     const dayNumber = date.getDate();
     
@@ -23,9 +14,8 @@ export default function WeekOverview() {
   };
 
   // Check if date is today
-  const isToday = (dateStr: string) => {
+  const isToday = (date: Date) => {
     const today = new Date();
-    const date = new Date(dateStr);
     return (
       date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&
@@ -34,12 +24,12 @@ export default function WeekOverview() {
   };
 
   // Check if date is in the future
-  const isFutureDate = (dateStr: string) => {
+  const isFutureDate = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const date = new Date(dateStr);
-    date.setHours(0, 0, 0, 0);
-    return date > today;
+    const dateCopy = new Date(date);
+    dateCopy.setHours(0, 0, 0, 0);
+    return dateCopy > today;
   };
 
   return (
@@ -64,9 +54,9 @@ export default function WeekOverview() {
             ))
           ) : (
             weekData.map((day, index) => {
-              const { dayName, dayNumber } = formatDayInfo(day.date as string);
-              const future = isFutureDate(day.date as string);
-              const current = isToday(day.date as string);
+              const { dayName, dayNumber } = formatDayInfo(day.date);
+              const future = isFutureDate(day.date);
+              const current = isToday(day.date);
               
               return (
                 <div 
