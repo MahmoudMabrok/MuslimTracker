@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAchievements } from '@/hooks/useLocalStorage';
-import { Achievement } from '@/types/schema';
+import { Achievement, AchievementsResponse } from '@/types/schema';
 
 export default function QuranCompletionTracker() {
   const TOTAL_QURAN_PAGES = 614;
@@ -33,29 +34,44 @@ export default function QuranCompletionTracker() {
 
   const { pagesRead, percentage } = getCompletionProgress();
 
+  // State to store estimated completion date
+  const [estimatedCompletionDate, setEstimatedCompletionDate] = useState<string | null>(null);
+  
   // Calculate estimated completion date based on current reading pace
-  const getEstimatedCompletionDate = () => {
-    if (!achievements || !pagesRead) return null;
+  useEffect(() => {
+    if (!achievements || !pagesRead) {
+      setEstimatedCompletionDate(null);
+      return;
+    }
     
     // Find the oldest achievement date to calculate reading pace
     let oldestDate: Date | null = null;
     
-    achievements.earned.forEach(a => {
-      if (a.achievedDate) {
-        const date = new Date(a.achievedDate);
-        if (!oldestDate || date < oldestDate) {
-          oldestDate = date;
+    if (achievements.earned && achievements.earned.length > 0) {
+      for (const achievement of achievements.earned) {
+        if (achievement.achievedDate) {
+          const date = new Date(achievement.achievedDate);
+          if (!oldestDate || date < oldestDate) {
+            oldestDate = date;
+          }
         }
       }
-    });
+    }
     
-    if (!oldestDate) return null;
+    if (!oldestDate) {
+      setEstimatedCompletionDate(null);
+      return;
+    }
     
     const today = new Date();
-    const daysSinceStart = Math.max(1, Math.ceil((today.getTime() - oldestDate.getTime()) / (1000 * 60 * 60 * 24)));
+    const timeDiff = today.getTime() - oldestDate.getTime();
+    const daysSinceStart = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
     const pagesPerDay = pagesRead / daysSinceStart;
     
-    if (pagesPerDay <= 0) return null;
+    if (pagesPerDay <= 0) {
+      setEstimatedCompletionDate(null);
+      return;
+    }
     
     const remainingPages = TOTAL_QURAN_PAGES - pagesRead;
     const daysToComplete = Math.ceil(remainingPages / pagesPerDay);
@@ -63,14 +79,12 @@ export default function QuranCompletionTracker() {
     const completionDate = new Date();
     completionDate.setDate(completionDate.getDate() + daysToComplete);
     
-    return completionDate.toLocaleDateString('en-US', {
+    setEstimatedCompletionDate(completionDate.toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric'
-    });
-  };
-
-  const estimatedCompletionDate = getEstimatedCompletionDate();
+    }));
+  }, [achievements, pagesRead]);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-6">
@@ -93,7 +107,7 @@ export default function QuranCompletionTracker() {
           <Skeleton className="h-2.5 w-full mb-1" />
         ) : (
           <>
-            <Progress value={parseFloat(percentage)} className="h-2.5" />
+            <Progress value={Number(percentage)} className="h-2.5" />
             <div className="text-xs text-gray-500 mt-1 text-right">{percentage}% Complete</div>
           </>
         )}
