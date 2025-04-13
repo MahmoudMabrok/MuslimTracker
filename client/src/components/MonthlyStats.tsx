@@ -1,21 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-
-type MonthlyStats = {
-  totalPages: number;
-  fajrPrayedCount: number;
-  totalDays: number;
-};
+import { useMonthlySummary } from '@/hooks/useLocalStorage';
 
 export default function MonthlyStats() {
   const today = new Date();
   const currentMonth = today.getMonth() + 1; // JavaScript months are 0-based
   const currentYear = today.getFullYear();
 
-  const { data: stats, isLoading } = useQuery<MonthlyStats>({
-    queryKey: [`/api/monthly-summary/${currentYear}/${currentMonth}`],
-  });
+  const { data: stats, isLoading } = useMonthlySummary(currentMonth, currentYear);
 
   // Calculate reading consistency percentage
   const getConsistencyPercentage = () => {

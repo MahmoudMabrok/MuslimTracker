@@ -1,29 +1,16 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import DetailedEntryModal from './DetailedEntryModal';
-
-type HistoryEntry = {
-  date: string;
-  totalPages: number;
-  entries: Array<{
-    id: number;
-    startPage: number;
-    endPage: number;
-    date: string;
-  }>;
-  fajrPrayed: boolean;
-};
+import { useHistory } from '@/hooks/useLocalStorage';
+import { HistoryEntry } from '@/types/schema';
 
 export default function ReadingHistory() {
   const [timeFrame, setTimeFrame] = useState('thisWeek');
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  const { data: historyData = [], isLoading } = useQuery<HistoryEntry[]>({
-    queryKey: ['/api/history'],
-  });
+  const { data: historyData = [], isLoading } = useHistory();
 
   // Format date for display
   const formatDate = (dateStr: string) => {

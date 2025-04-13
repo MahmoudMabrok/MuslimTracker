@@ -1,15 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
-
-type StreaksData = {
-  quranStreak: number;
-  fajrStreak: number;
-};
+import { useStreaks } from '@/hooks/useLocalStorage';
 
 export default function StreakSummary() {
-  const { data: streaks, isLoading } = useQuery<StreaksData>({
-    queryKey: ['/api/streaks'],
-  });
+  const { data: streaks, isLoading } = useStreaks();
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-6">
