@@ -2,17 +2,26 @@ import { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAchievements } from '@/hooks/useLocalStorage';
-import { Achievement, AchievementsResponse } from '@/types/schema';
+import { Achievement } from '@/types/schema';
 
 export default function QuranCompletionTracker() {
   const TOTAL_QURAN_PAGES = 614;
   
   const { data: achievements, isLoading } = useAchievements();
+  const [pagesRead, setPagesRead] = useState(0);
+  const [percentage, setPercentage] = useState('0');
+  const [estimatedCompletionDate, setEstimatedCompletionDate] = useState<string | null>(null);
 
-  // Find the page milestone achievements to track overall progress
-  const getCompletionProgress = () => {
-    if (!achievements) return { pagesRead: 0, percentage: 0 };
+  // Calculate completion progress and estimated completion date when achievements data changes
+  useEffect(() => {
+    if (!achievements) {
+      setPagesRead(0);
+      setPercentage('0');
+      setEstimatedCompletionDate(null);
+      return;
+    }
     
+    // Find the page milestone achievements to track overall progress
     const pagesMilestones = [
       ...achievements.earned.filter(a => a.type === 'pages_milestone'),
       ...achievements.inProgress.filter(a => a.type === 'pages_milestone')
@@ -24,26 +33,20 @@ export default function QuranCompletionTracker() {
     // Get the first one (highest progress)
     const highestMilestone = pagesMilestones[0];
     
-    if (!highestMilestone) return { pagesRead: 0, percentage: 0 };
-    
-    const pagesRead = highestMilestone.progress;
-    const percentage = ((pagesRead / TOTAL_QURAN_PAGES) * 100).toFixed(1);
-    
-    return { pagesRead, percentage };
-  };
-
-  const { pagesRead, percentage } = getCompletionProgress();
-
-  // State to store estimated completion date
-  const [estimatedCompletionDate, setEstimatedCompletionDate] = useState<string | null>(null);
-  
-  // Calculate estimated completion date based on current reading pace
-  useEffect(() => {
-    if (!achievements || !pagesRead) {
+    if (!highestMilestone) {
+      setPagesRead(0);
+      setPercentage('0');
       setEstimatedCompletionDate(null);
       return;
     }
     
+    const pages = highestMilestone.progress;
+    const percentValue = ((pages / TOTAL_QURAN_PAGES) * 100).toFixed(1);
+    
+    setPagesRead(pages);
+    setPercentage(percentValue);
+    
+    // Calculate estimated completion date
     // Find the oldest achievement date to calculate reading pace
     let oldestDate: Date | null = null;
     
@@ -58,7 +61,7 @@ export default function QuranCompletionTracker() {
       }
     }
     
-    if (!oldestDate) {
+    if (!oldestDate || pages <= 0) {
       setEstimatedCompletionDate(null);
       return;
     }
@@ -66,14 +69,14 @@ export default function QuranCompletionTracker() {
     const today = new Date();
     const timeDiff = today.getTime() - oldestDate.getTime();
     const daysSinceStart = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
-    const pagesPerDay = pagesRead / daysSinceStart;
+    const pagesPerDay = pages / daysSinceStart;
     
     if (pagesPerDay <= 0) {
       setEstimatedCompletionDate(null);
       return;
     }
     
-    const remainingPages = TOTAL_QURAN_PAGES - pagesRead;
+    const remainingPages = TOTAL_QURAN_PAGES - pages;
     const daysToComplete = Math.ceil(remainingPages / pagesPerDay);
     
     const completionDate = new Date();
@@ -84,7 +87,7 @@ export default function QuranCompletionTracker() {
       day: 'numeric',
       year: 'numeric'
     }));
-  }, [achievements, pagesRead]);
+  }, [achievements]);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-6">
