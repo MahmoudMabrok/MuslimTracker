@@ -74,7 +74,7 @@ export default function WeekOverview() {
                     {future ? (
                       <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 text-gray-400 text-xs mb-1">-</div>
                     ) : (
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-secondary text-white text-xs mb-1">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs mb-1 ${day.totalPages === 0 ? 'bg-red-500' : 'bg-secondary'}`}>
                         {day.totalPages}
                       </div>
                     )}
