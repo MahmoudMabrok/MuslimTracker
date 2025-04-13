@@ -54,9 +54,10 @@ export default function WeekOverview() {
             ))
           ) : (
             weekData.map((day, index) => {
-              const { dayName, dayNumber } = formatDayInfo(day.date);
-              const future = isFutureDate(day.date);
-              const current = isToday(day.date);
+              const dateObj = new Date(day.date);
+              const { dayName, dayNumber } = formatDayInfo(dateObj);
+              const future = isFutureDate(dateObj);
+              const current = isToday(dateObj);
               
               return (
                 <div 
