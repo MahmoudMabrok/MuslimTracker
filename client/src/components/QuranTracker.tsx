@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { QuranEntry } from '@shared/schema';
+import { useQuranEntries, useCreateQuranEntry, useDeleteQuranEntry } from '@/hooks/useLocalStorage';
 
 const quranFormSchema = z.object({
   startPage: z.coerce.number().min(1).max(614),
@@ -22,13 +21,11 @@ type QuranFormValues = z.infer<typeof quranFormSchema>;
 
 export default function QuranTracker() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [totalPages, setTotalPages] = useState(0);
 
-  // Query for today's entries
-  const { data: entries = [], isLoading } = useQuery<QuranEntry[]>({
-    queryKey: ['/api/quran-entries'],
-  });
+  // Get today's entries from local storage
+  const today = new Date();
+  const { data: entries = [], isLoading } = useQuranEntries(today);
 
   // Calculate total pages whenever entries change
   useEffect(() => {
@@ -50,56 +47,10 @@ export default function QuranTracker() {
   });
 
   // Add Quran entry mutation
-  const addEntryMutation = useMutation({
-    mutationFn: (values: QuranFormValues) => 
-      apiRequest('POST', '/api/quran-entries', values)
-        .then(res => res.json()),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/quran-entries'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/streaks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/achievements'] });
-      
-      toast({
-        title: "Success!",
-        description: "Quran reading has been recorded.",
-      });
-      
-      form.reset({
-        startPage: 1,
-        endPage: 1,
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to record Quran reading.",
-        variant: "destructive",
-      });
-    },
-  });
+  const addEntryMutation = useCreateQuranEntry();
 
   // Delete Quran entry mutation
-  const deleteEntryMutation = useMutation({
-    mutationFn: (entryId: number) => 
-      apiRequest('DELETE', `/api/quran-entries/${entryId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/quran-entries'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/streaks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/achievements'] });
-      
-      toast({
-        title: "Deleted",
-        description: "Entry has been removed.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete entry.",
-        variant: "destructive",
-      });
-    },
-  });
+  const deleteEntryMutation = useDeleteQuranEntry();
 
   // Form submission handler
   const onSubmit = (values: QuranFormValues) => {
