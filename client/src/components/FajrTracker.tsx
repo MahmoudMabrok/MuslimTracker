@@ -26,7 +26,7 @@ export default function FajrTracker() {
 
   const handleToggle = (checked: boolean) => {
     setFajrPrayed(checked);
-    fajrMutation.mutate({ prayed: checked, userId: 1 });
+    fajrMutation.mutate({ prayed: checked });
   };
 
   return (

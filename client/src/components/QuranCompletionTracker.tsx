@@ -1,27 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-
-type Achievement = {
-  id: number;
-  type: string;
-  value: number;
-  achieved: boolean;
-  achievedDate?: string;
-  progress: number;
-};
-
-type AchievementsResponse = {
-  earned: Achievement[];
-  inProgress: Achievement[];
-};
+import { useAchievements } from '@/hooks/useLocalStorage';
+import { Achievement } from '@/types/schema';
 
 export default function QuranCompletionTracker() {
   const TOTAL_QURAN_PAGES = 614;
   
-  const { data: achievements, isLoading } = useQuery<AchievementsResponse>({
-    queryKey: ['/api/achievements'],
-  });
+  const { data: achievements, isLoading } = useAchievements();
 
   // Find the page milestone achievements to track overall progress
   const getCompletionProgress = () => {
