@@ -54,6 +54,24 @@ export default function QuranTracker() {
 
   // Form submission handler
   const onSubmit = (values: QuranFormValues) => {
+    // Check for page overlap with existing entries
+    const hasOverlap = entries?.some(entry => {
+      return (
+        (values.startPage >= entry.startPage && values.startPage <= entry.endPage) ||
+        (values.endPage >= entry.startPage && values.endPage <= entry.endPage) ||
+        (values.startPage <= entry.startPage && values.endPage >= entry.endPage)
+      );
+    });
+
+    if (hasOverlap) {
+      toast({
+        variant: "destructive",
+        title: "Invalid page range",
+        description: "These pages overlap with an existing entry for today"
+      });
+      return;
+    }
+
     addEntryMutation.mutate(values);
   };
 
@@ -71,7 +89,7 @@ export default function QuranTracker() {
         <span className="material-icons mr-2 text-primary">menu_book</span>
         Track Quran Reading
       </h2>
-      
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="mb-4">
@@ -98,7 +116,7 @@ export default function QuranTracker() {
                   )}
                 />
               </div>
-              
+
               <div className="flex-1">
                 <FormField
                   control={form.control}
@@ -120,7 +138,7 @@ export default function QuranTracker() {
                   )}
                 />
               </div>
-              
+
               <Button 
                 type="submit" 
                 className="bg-primary text-white p-2 rounded-md mt-5"
@@ -140,7 +158,7 @@ export default function QuranTracker() {
             {totalPages} pages
           </span>
         </div>
-        
+
         {isLoading ? (
           <div className="py-4 text-center text-gray-500">Loading entries...</div>
         ) : entries && entries.length > 0 ? (
