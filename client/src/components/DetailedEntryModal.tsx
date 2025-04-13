@@ -1,6 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useDeleteQuranEntry } from '@/hooks/useLocalStorage';
 import {
   Dialog,
   DialogContent,
@@ -37,7 +36,6 @@ export default function DetailedEntryModal({
   onClose 
 }: DetailedEntryModalProps) {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   // Format date for display
   const formatDateTime = (dateStr: string) => {
@@ -58,36 +56,21 @@ export default function DetailedEntryModal({
   };
 
   // Delete entry mutation
-  const deleteEntryMutation = useMutation({
-    mutationFn: (entryId: number) => 
-      apiRequest('DELETE', `/api/quran-entries/${entryId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/quran-entries'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/history'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/streaks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/achievements'] });
-      
-      toast({
-        title: "Entry Deleted",
-        description: "The reading entry has been removed.",
-      });
-      
-      onClose();
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete entry.",
-        variant: "destructive",
-      });
-    },
-  });
+  const deleteEntryMutation = useDeleteQuranEntry();
 
   if (!entry) return null;
 
   const handleDeleteEntry = (entryId: number) => {
     if (confirm("Are you sure you want to delete this entry?")) {
-      deleteEntryMutation.mutate(entryId);
+      deleteEntryMutation.mutate(entryId, {
+        onSuccess: () => {
+          toast({
+            title: "Entry Deleted",
+            description: "The reading entry has been removed.",
+          });
+          onClose();
+        }
+      });
     }
   };
 

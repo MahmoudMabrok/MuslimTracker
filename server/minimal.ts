@@ -11,7 +11,7 @@ async function init() {
   await setupVite(app, server);
   
   // Start server
-  const port = process.env.PORT || 5000;
+  const port = parseInt(process.env.PORT || '5000');
   server.listen(port, '0.0.0.0', () => {
     log(`serving on port ${port}`);
   });
