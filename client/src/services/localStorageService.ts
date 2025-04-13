@@ -1,4 +1,8 @@
-import { User, QuranEntry, FajrEntry, Achievement, InsertQuranEntry, InsertFajrEntry, InsertAchievement, ACHIEVEMENT_TYPES } from '../types/schema';
+import { 
+  User, QuranEntry, FajrEntry, Achievement, 
+  InsertQuranEntry, InsertFajrEntry, InsertAchievement, 
+  ACHIEVEMENT_TYPES, HistoryEntry, AchievementsResponse 
+} from '../types/schema';
 
 const STORAGE_KEYS = {
   USER: 'muslim_tracker_user',
@@ -134,7 +138,7 @@ export const createQuranEntry = async (entry: InsertQuranEntry): Promise<QuranEn
   localStorage.setItem(STORAGE_KEYS.QURAN_ENTRIES, JSON.stringify(entries));
   
   // Update achievements after adding entry
-  updateAchievements();
+  await updateAchievements();
   
   return newEntry;
 };
@@ -169,7 +173,7 @@ export const deleteQuranEntry = async (id: number): Promise<boolean> => {
     localStorage.setItem(STORAGE_KEYS.QURAN_ENTRIES, JSON.stringify(filteredEntries));
     
     // Update achievements after deletion
-    updateAchievements();
+    await updateAchievements();
     
     return true;
   }
@@ -211,7 +215,7 @@ export const createFajrEntry = async (entry: InsertFajrEntry): Promise<FajrEntry
   localStorage.setItem(STORAGE_KEYS.FAJR_ENTRIES, JSON.stringify(entries));
   
   // Update achievements after adding/updating entry
-  updateAchievements();
+  await updateAchievements();
   
   return newEntry;
 };
@@ -431,9 +435,9 @@ const calculateFajrStreak = async (): Promise<number> => {
 };
 
 // History methods
-export const getHistory = () => {
-  const quranEntries = getQuranEntries();
-  const fajrEntries = getFajrEntries();
+export const getHistory = async (): Promise<HistoryEntry[]> => {
+  const quranEntries = await getQuranEntries();
+  const fajrEntries = await getFajrEntries();
   
   // Group quran entries by day
   const entriesByDay = new Map<string, {
@@ -484,8 +488,8 @@ export const getHistory = () => {
 };
 
 // Achievements data
-export const getAchievementsData = () => {
-  const achievements = getAchievements();
+export const getAchievementsData = async (): Promise<AchievementsResponse> => {
+  const achievements = await getAchievements();
   
   return {
     earned: achievements.filter(a => a.achieved),
@@ -494,47 +498,52 @@ export const getAchievementsData = () => {
 };
 
 // Update all achievements based on current data
-const updateAchievements = () => {
-  const achievements = getAchievements();
-  const quranEntries = getQuranEntries();
-  const { quranStreak, fajrStreak } = getCurrentStreaks();
-  
-  // Calculate total pages read
-  const totalPages = quranEntries.reduce((total, entry) => {
-    return total + (entry.endPage - entry.startPage + 1);
-  }, 0);
-  
-  // Update streak achievements
-  achievements.forEach(achievement => {
-    if (achievement.type === ACHIEVEMENT_TYPES.QURAN_STREAK) {
-      achievement.progress = quranStreak;
-      achievement.achieved = quranStreak >= achievement.value;
-      
-      if (achievement.achieved && !achievement.achievedDate) {
-        achievement.achievedDate = new Date().toISOString();
-      }
-    }
+const updateAchievements = async () => {
+  try {
+    const achievements = await getAchievements();
+    const quranEntries = await getQuranEntries();
+    const streaks = await getCurrentStreaks();
+    const { quranStreak, fajrStreak } = streaks;
     
-    if (achievement.type === ACHIEVEMENT_TYPES.FAJR_STREAK) {
-      achievement.progress = fajrStreak;
-      achievement.achieved = fajrStreak >= achievement.value;
-      
-      if (achievement.achieved && !achievement.achievedDate) {
-        achievement.achievedDate = new Date().toISOString();
-      }
-    }
+    // Calculate total pages read
+    const totalPages = quranEntries.reduce((total, entry) => {
+      return total + (entry.endPage - entry.startPage + 1);
+    }, 0);
     
-    if (achievement.type === ACHIEVEMENT_TYPES.PAGES_MILESTONE) {
-      achievement.progress = Math.min(totalPages, achievement.value);
-      achievement.achieved = totalPages >= achievement.value;
-      
-      if (achievement.achieved && !achievement.achievedDate) {
-        achievement.achievedDate = new Date().toISOString();
+    // Update streak achievements
+    achievements.forEach(achievement => {
+      if (achievement.type === ACHIEVEMENT_TYPES.QURAN_STREAK) {
+        achievement.progress = quranStreak;
+        achievement.achieved = quranStreak >= achievement.value;
+        
+        if (achievement.achieved && !achievement.achievedDate) {
+          achievement.achievedDate = new Date().toISOString();
+        }
       }
-    }
-  });
-  
-  localStorage.setItem(STORAGE_KEYS.ACHIEVEMENTS, JSON.stringify(achievements));
+      
+      if (achievement.type === ACHIEVEMENT_TYPES.FAJR_STREAK) {
+        achievement.progress = fajrStreak;
+        achievement.achieved = fajrStreak >= achievement.value;
+        
+        if (achievement.achieved && !achievement.achievedDate) {
+          achievement.achievedDate = new Date().toISOString();
+        }
+      }
+      
+      if (achievement.type === ACHIEVEMENT_TYPES.PAGES_MILESTONE) {
+        achievement.progress = Math.min(totalPages, achievement.value);
+        achievement.achieved = totalPages >= achievement.value;
+        
+        if (achievement.achieved && !achievement.achievedDate) {
+          achievement.achievedDate = new Date().toISOString();
+        }
+      }
+    });
+    
+    localStorage.setItem(STORAGE_KEYS.ACHIEVEMENTS, JSON.stringify(achievements));
+  } catch (error) {
+    console.error('Error updating achievements:', error);
+  }
 };
 
 // Initialize storage on module load
