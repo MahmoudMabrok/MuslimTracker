@@ -4,6 +4,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import DetailedEntryModal from './DetailedEntryModal';
 import { useHistory } from '@/hooks/useLocalStorage';
 import { HistoryEntry } from '@/types/schema';
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 
 export default function ReadingHistory() {
   const [timeFrame, setTimeFrame] = useState('thisWeek');
@@ -70,9 +72,58 @@ export default function ReadingHistory() {
     setIsModalOpen(true);
   };
 
+  // Process data for chart
+  const chartData = filteredHistory.slice().reverse().map(day => ({
+    date: new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    pages: day.totalPages
+  }));
+
   return (
     <>
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div className="mb-4 h-[200px]">
+          <ChartContainer
+            config={{
+              pages: {
+                label: 'Pages Read',
+                theme: {
+                  light: '#0097FB',
+                  dark: '#0097FB'
+                }
+              }
+            }}
+          >
+            <LineChart data={chartData}>
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                dy={10}
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                dx={-10}
+                tick={{ fontSize: 12 }}
+              />
+              <Tooltip content={props => (
+                <ChartTooltipContent
+                  {...props}
+                  nameKey="date"
+                  labelKey="pages"
+                />
+              )} />
+              <Line
+                type="monotone"
+                dataKey="pages"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4 }}
+              />
+            </LineChart>
+          </ChartContainer>
+        </div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold flex items-center">
             <span className="material-icons mr-2 text-primary">history</span>
