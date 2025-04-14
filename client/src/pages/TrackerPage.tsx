@@ -8,6 +8,18 @@ import StreakSummary from '@/components/StreakSummary';
 import WeekOverview from '@/components/WeekOverview';
 
 export default function TrackerPage() {
+
+  console.log("TrackerPage rendered");
+  // This is a placeholder for any data fetching or state management you might want to do
+  // For example, you could use React Query or any other state management library
+
+  // to fetch user data, Quran progress, etc.
+  // const { data: userData } = useQuery('userData', fetchUserData);
+  // const { data: quranProgress } = useQuery('quranProgress', fetchQuranProgress);
+
+  // const { data: fajrProgress } = useQuery('fajrProgress', fetchFajrProgress);
+  // const { data: streakData } = useQuery('streakData', fetchStreakData);
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Header />

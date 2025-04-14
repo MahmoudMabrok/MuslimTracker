@@ -1,19 +1,21 @@
 import { useEffect } from 'react';
-import { useLocation } from 'wouter';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useNavigate } from 'react-router-dom';
 
 export default function HomePage() {
-  const [_, setLocation] = useLocation();
+  const navigate = useNavigate();
+
+  console.log("HomePage rendered");
 
   // Automatically redirect to the tracker page
   useEffect(() => {
     // Small timeout to allow the page to render
     const timeout = setTimeout(() => {
-      setLocation('/tracker');
+      // navigate('/tracker');
     }, 100);
     
     return () => clearTimeout(timeout);
-  }, [setLocation]);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
