@@ -9,9 +9,10 @@ export default function HomePage() {
 
   // Automatically redirect to the tracker page
   useEffect(() => {
+
     // Small timeout to allow the page to render
     const timeout = setTimeout(() => {
-      // navigate('/tracker');
+      navigate('/tracker');
     }, 100);
     
     return () => clearTimeout(timeout);

@@ -13,7 +13,7 @@ function AppRouter() {
   return (
     <Router>
       <Routes>
-      <Route path="/" element={<TrackerPage/>} />
+      <Route path="/" element={<HomePage/>} />
       <Route path="/tracker" element={<TrackerPage/>} />
       <Route path="/statistics" element={<StatisticsPage/>} />
       <Route path="/achievements" element={<AchievementsPage/>} />
