@@ -1,15 +1,18 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWeeklySummary } from '@/hooks/useLocalStorage';
 import { DailySummary } from '@/types/schema';
+import DetailedEntryModal from './DetailedEntryModal';
+import { useState } from 'react';
 
 export default function WeekOverview() {
   const { data: weekData = [], isLoading } = useWeeklySummary();
+  const [selectedDay, setSelectedDay] = useState<DailySummary | null>(null);
 
   // Format day name and date
   const formatDayInfo = (date: Date) => {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     const dayNumber = date.getDate();
-    
+
     return { dayName, dayNumber };
   };
 
@@ -38,7 +41,7 @@ export default function WeekOverview() {
         <span className="material-icons mr-2 text-primary">date_range</span>
         Weekly Overview
       </h2>
-      
+
       <div className="overflow-x-auto">
         <div className="inline-flex space-x-2 min-w-full pb-2">
           {isLoading ? (
@@ -58,18 +61,19 @@ export default function WeekOverview() {
               const { dayName, dayNumber } = formatDayInfo(dateObj);
               const future = isFutureDate(dateObj);
               const current = isToday(dateObj);
-              
+
               return (
                 <div 
                   key={index}
-                  className={`flex flex-col items-center min-w-[60px] p-2 border rounded
+                  className={`flex flex-col items-center min-w-[60px] p-2 border rounded cursor-pointer
                     ${current ? 'bg-neutral-light font-bold' : ''}
                     ${future ? 'opacity-50' : ''}
                   `}
+                  onClick={() => setSelectedDay(day)}
                 >
                   <div className="text-xs text-gray-500">{dayName}</div>
                   <div className="text-sm font-bold">{dayNumber.toString().padStart(2, '0')}</div>
-                  
+
                   <div className="mt-2 flex flex-col items-center">
                     {future ? (
                       <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 text-gray-400 text-xs mb-1">-</div>
@@ -80,7 +84,7 @@ export default function WeekOverview() {
                     )}
                     <div className="text-xs">pages</div>
                   </div>
-                  
+
                   <div className="mt-1">
                     {future ? (
                       <span className="material-icons text-gray-300 text-sm">radio_button_unchecked</span>
@@ -96,6 +100,7 @@ export default function WeekOverview() {
           )}
         </div>
       </div>
+      {selectedDay && <DetailedEntryModal day={selectedDay} onClose={() => setSelectedDay(null)} />}
     </div>
   );
 }
