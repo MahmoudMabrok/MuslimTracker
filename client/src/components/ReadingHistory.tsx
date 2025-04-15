@@ -8,6 +8,8 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'rec
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 
 export default function ReadingHistory() {
+  import { formatHistoryData } from '@/utils/historyUtils';
+  
   const [timeFrame, setTimeFrame] = useState('thisWeek');
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,8 +24,6 @@ export default function ReadingHistory() {
       year: 'numeric'
     });
   };
-
-  import { formatHistoryData } from '@/utils/historyUtils';
   
   const filteredHistory = formatHistoryData(historyData, timeFrame);
 
