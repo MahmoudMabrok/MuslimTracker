@@ -75,6 +75,8 @@ export default function ReadingHistory() {
                 <SelectItem value="lastWeek">Last Week</SelectItem>
                 <SelectItem value="thisMonth">This Month</SelectItem>
                 <SelectItem value="lastMonth">Last Month</SelectItem>
+                <SelectItem value="thisYear">This Year</SelectItem>
+                <SelectItem value="lastYear">Last Year</SelectItem>
               </SelectContent>
             </Select>
           </div>

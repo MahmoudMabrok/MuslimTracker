@@ -3,7 +3,7 @@ import { HistoryEntry } from '@/types/schema';
 
 export const formatHistoryData = (
   historyData: HistoryEntry[],
-  timeFrame: 'thisWeek' | 'lastWeek' | 'thisMonth' | 'lastMonth'
+  timeFrame: 'thisWeek' | 'lastWeek' | 'thisMonth' | 'lastMonth' | 'thisYear' | 'lastYear'
 ): HistoryEntry[] => {
   if (!historyData.length) return [];
 
@@ -35,6 +35,16 @@ export const formatHistoryData = (
     case 'lastMonth': {
       startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
       endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+      break;
+    }
+    case 'thisYear': {
+      startDate = new Date(today.getFullYear(), 0, 1);
+      endDate = today;
+      break;
+    }
+    case 'lastYear': {
+      startDate = new Date(today.getFullYear() - 1, 0, 1);
+      endDate = new Date(today.getFullYear() - 1, 11, 31);
       break;
     }
   }
