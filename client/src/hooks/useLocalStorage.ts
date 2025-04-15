@@ -127,7 +127,49 @@ export function useStreaks() {
 export function useHistory() {
   return useQuery({
     queryKey: ['history'],
-    queryFn: () => localStorageService.getHistory(),
+    queryFn: async () => {
+      const history = await localStorageService.getHistory();
+      
+      if (history.length === 0) return [];
+      
+      // Find min and max dates from existing entries
+      const dates = history.map(entry => new Date(entry.date));
+      const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+      const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+      
+      // Create a map of existing entries by date string
+      const entriesByDate = new Map(
+        history.map(entry => [
+          new Date(entry.date).toISOString().split('T')[0],
+          entry
+        ])
+      );
+      
+      // Fill in missing dates
+      const filledHistory = [];
+      const currentDate = new Date(minDate);
+      
+      while (currentDate <= maxDate) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        
+        if (entriesByDate.has(dateStr)) {
+          filledHistory.push(entriesByDate.get(dateStr));
+        } else {
+          filledHistory.push({
+            date: new Date(currentDate),
+            totalPages: 0,
+            fajrPrayed: false,
+            entries: []
+          });
+        }
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      return filledHistory.sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+    },
   });
 }
 
