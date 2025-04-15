@@ -81,7 +81,28 @@ export default function ReadingHistory() {
   return (
     <>
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div className="mb-4 h-[200px]">
+       
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold flex items-center">
+            <span className="material-icons mr-2 text-primary">history</span>
+            Reading History
+          </h2>
+          <div>
+            <Select value={timeFrame} onValueChange={setTimeFrame}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="This Week" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="thisWeek">This Week</SelectItem>
+                <SelectItem value="lastWeek">Last Week</SelectItem>
+                <SelectItem value="thisMonth">This Month</SelectItem>
+                <SelectItem value="lastMonth">Last Month</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="mb-4">
           <ChartContainer
             config={{
               pages: {
@@ -123,25 +144,6 @@ export default function ReadingHistory() {
               />
             </LineChart>
           </ChartContainer>
-        </div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold flex items-center">
-            <span className="material-icons mr-2 text-primary">history</span>
-            Reading History
-          </h2>
-          <div>
-            <Select value={timeFrame} onValueChange={setTimeFrame}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="This Week" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="thisWeek">This Week</SelectItem>
-                <SelectItem value="lastWeek">Last Week</SelectItem>
-                <SelectItem value="thisMonth">This Month</SelectItem>
-                <SelectItem value="lastMonth">Last Month</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
         
         <div className="overflow-hidden">
