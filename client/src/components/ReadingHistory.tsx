@@ -23,49 +23,9 @@ export default function ReadingHistory() {
     });
   };
 
-  // Filter history based on selected time frame
-  const getFilteredHistory = () => {
-    const today = new Date();
-    const oneDay = 24 * 60 * 60 * 1000;
-    
-    switch (timeFrame) {
-      case 'thisWeek': {
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay()); // Go to Sunday
-        return historyData.filter(entry => 
-          new Date(entry.date) >= startOfWeek
-        );
-      }
-      case 'lastWeek': {
-        const startOfLastWeek = new Date(today);
-        startOfLastWeek.setDate(today.getDate() - today.getDay() - 7);
-        const endOfLastWeek = new Date(startOfLastWeek);
-        endOfLastWeek.setDate(startOfLastWeek.getDate() + 6);
-        return historyData.filter(entry => {
-          const entryDate = new Date(entry.date);
-          return entryDate >= startOfLastWeek && entryDate <= endOfLastWeek;
-        });
-      }
-      case 'thisMonth': {
-        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        return historyData.filter(entry => 
-          new Date(entry.date) >= startOfMonth
-        );
-      }
-      case 'lastMonth': {
-        const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-        return historyData.filter(entry => {
-          const entryDate = new Date(entry.date);
-          return entryDate >= startOfLastMonth && entryDate <= endOfLastMonth;
-        });
-      }
-      default:
-        return historyData;
-    }
-  };
-
-  const filteredHistory = getFilteredHistory();
+  import { formatHistoryData } from '@/utils/historyUtils';
+  
+  const filteredHistory = formatHistoryData(historyData, timeFrame);
 
   const openEntryDetails = (entry: HistoryEntry) => {
     setSelectedEntry(entry);
