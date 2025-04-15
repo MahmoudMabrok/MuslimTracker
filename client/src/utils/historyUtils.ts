@@ -8,6 +8,7 @@ export const formatHistoryData = (
   if (!historyData.length) return [];
 
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
   let startDate: Date;
   let endDate: Date;
 
@@ -40,10 +41,11 @@ export const formatHistoryData = (
 
   // Create map of existing entries
   const entriesByDate = new Map(
-    historyData.map(entry => [
-      new Date(entry.date).toISOString().split('T')[0],
-      entry
-    ])
+    historyData.map(entry => {
+      const entryDate = new Date(entry.date);
+      entryDate.setHours(0, 0, 0, 0);
+      return [entryDate.toISOString().split('T')[0], entry];
+    })
   );
 
   // Fill in all dates in the range
