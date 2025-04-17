@@ -14,10 +14,6 @@ type WeekOverviewProps = {
 
 export default function WeekOverview({ selectedDay, onDaySelect }: WeekOverviewProps) {
   const { data: weekData = [], isLoading } = useWeeklySummary();
-  const [newEntry, setNewEntry] = useState({ startPage: '', endPage: '' });
-  
-  const createEntry = useCreateQuranEntry();
-  const deleteEntry = useDeleteQuranEntry();
 
   const formatDayInfo = (date: Date) => {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
@@ -31,20 +27,6 @@ export default function WeekOverview({ selectedDay, onDaySelect }: WeekOverviewP
     const dateCopy = new Date(date);
     dateCopy.setHours(0, 0, 0, 0);
     return dateCopy > today;
-  };
-
-  const handleAddEntry = () => {
-    if (!selectedDay) return;
-    const start = parseInt(newEntry.startPage);
-    const end = parseInt(newEntry.endPage);
-    if (isNaN(start) || isNaN(end) || start > end || start < 1 || end > 614) return;
-    
-    createEntry.mutate({
-      startPage: start,
-      endPage: end,
-      date: selectedDay.date
-    });
-    setNewEntry({ startPage: '', endPage: '' });
   };
 
   return (
@@ -112,49 +94,6 @@ export default function WeekOverview({ selectedDay, onDaySelect }: WeekOverviewP
           )}
         </div>
       </div>
-
-      {selectedDay && (
-        <div className="mt-4 border-t pt-4">
-          <h3 className="font-medium mb-2">
-            Quran Entries for {selectedDay.date.toLocaleDateString()}
-          </h3>
-          
-          <div className="flex gap-2 mb-4">
-            <Input
-              type="number"
-              placeholder="Start Page"
-              value={newEntry.startPage}
-              onChange={(e) => setNewEntry(prev => ({ ...prev, startPage: e.target.value }))}
-              className="w-24"
-            />
-            <Input
-              type="number"
-              placeholder="End Page"
-              value={newEntry.endPage}
-              onChange={(e) => setNewEntry(prev => ({ ...prev, endPage: e.target.value }))}
-              className="w-24"
-            />
-            <Button onClick={handleAddEntry} disabled={createEntry.isPending}>
-              Add Entry
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            {selectedDay.entries.map((entry: QuranEntry) => (
-              <div key={entry.id} className="flex justify-between items-center bg-neutral-medium/50 p-2 rounded">
-                <span>Pages {entry.startPage}-{entry.endPage}</span>
-                <button
-                  onClick={() => deleteEntry.mutate(entry.id)}
-                  disabled={deleteEntry.isPending}
-                  className="text-status-error"
-                >
-                  <span className="material-icons text-sm">delete</span>
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
