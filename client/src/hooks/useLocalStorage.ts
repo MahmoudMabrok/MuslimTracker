@@ -26,7 +26,7 @@ export function useQuranEntries(date?: Date) {
 
 export function useCreateQuranEntry() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (entry: InsertQuranEntry) => 
       localStorageService.createQuranEntry(entry),
@@ -45,7 +45,7 @@ export function useCreateQuranEntry() {
 
 export function useDeleteQuranEntry() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: number) => 
       localStorageService.deleteQuranEntry(id),
@@ -72,7 +72,7 @@ export function useFajrEntry(date?: Date) {
 
 export function useCreateFajrEntry() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (entry: InsertFajrEntry) => 
       localStorageService.createFajrEntry(entry),
@@ -108,7 +108,7 @@ export function useMonthlySummary(month?: number, year?: number) {
   const today = new Date();
   const currentMonth = month || today.getMonth() + 1;
   const currentYear = year || today.getFullYear();
-  
+
   return useQuery({
     queryKey: ['monthlySummary', currentYear, currentMonth],
     queryFn: () => localStorageService.getMonthlySummary(currentMonth, currentYear),
@@ -129,14 +129,14 @@ export function useHistory() {
     queryKey: ['history'],
     queryFn: async () => {
       const history = await localStorageService.getHistory();
-      
+
       if (history.length === 0) return [];
-      
+
       // Find min and max dates from existing entries
       const dates = history.map(entry => new Date(entry.date));
       const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
       const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
-      
+
       // Create a map of existing entries by date string
       const entriesByDate = new Map(
         history.map(entry => [
@@ -144,14 +144,14 @@ export function useHistory() {
           entry
         ])
       );
-      
+
       // Fill in missing dates
       const filledHistory = [];
       const currentDate = new Date(minDate);
-      
+
       while (currentDate <= maxDate) {
         const dateStr = currentDate.toISOString().split('T')[0];
-        
+
         if (entriesByDate.has(dateStr)) {
           filledHistory.push(entriesByDate.get(dateStr));
         } else {
@@ -162,10 +162,10 @@ export function useHistory() {
             entries: []
           });
         }
-        
+
         currentDate.setDate(currentDate.getDate() + 1);
       }
-      
+
       return filledHistory.sort((a, b) => 
         new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime()
       );
