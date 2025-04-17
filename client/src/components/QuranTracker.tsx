@@ -19,12 +19,13 @@ const quranFormSchema = z.object({
 
 type QuranFormValues = z.infer<typeof quranFormSchema>;
 
+const today = new Date();
+
 export default function QuranTracker() {
   const { toast } = useToast();
   const [totalPages, setTotalPages] = useState(0);
 
   // Get today's entries from local storage
-  const today = new Date();
   const { data: entries = [], isLoading } = useQuranEntries(today);
 
   // Calculate total pages whenever entries change
