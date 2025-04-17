@@ -6,8 +6,15 @@ import WeekOverview from '@/components/WeekOverview';
 
 export const ID_COUNTER = "1327420/t/0";
 
+const intialDate = {
+  date: new Date(),
+  totalPages: 0,
+  fajrPrayed: false,
+  entries: []
+};
+
 export default function TrackerPage() {
-  const [selectedDay, setSelectedDay] = useState<DailySummary | null>(null);
+  const [selectedDay, setSelectedDay] = useState<DailySummary | null>(intialDate);
 
   useEffect(() => {
     try {
@@ -26,22 +33,11 @@ export default function TrackerPage() {
 
   console.log("TrackerPage rendered");
 
-  useEffect(() => {
-    // Set today as selected day on initial load
-    const today = new Date();
-    setSelectedDay({
-      date: today,
-      totalPages: 0,
-      fajrPrayed: false,
-      entries: []
-    });
-  }, []);
-
   return (
     <main>
       <WeekOverview selectedDay={selectedDay} onDaySelect={setSelectedDay} />
       <QuranTracker selectedDate={selectedDay?.date} />
-      <FajrTracker />
+      <FajrTracker  selectedDate={selectedDay?.date}/>
     </main>
   );
 }

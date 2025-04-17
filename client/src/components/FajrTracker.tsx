@@ -6,13 +6,22 @@ import { Label } from '@/components/ui/label';
 import { useFajrEntry, useCreateFajrEntry } from '@/hooks/useLocalStorage';
 import { FajrEntry } from '@/types/schema';
 
-export default function FajrTracker() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+
+type FajrTrackerProps = {
+  selectedDate?: Date;
+};
+
+const today = new Date();
+
+export default function FajrTracker({ selectedDate }: FajrTrackerProps) {
   const [fajrPrayed, setFajrPrayed] = useState(false);
 
   // Query for today's Fajr status
-  const { data: fajrEntry, isLoading } = useFajrEntry();
+  const { data: fajrEntry, isLoading } = useFajrEntry(selectedDate || today);
+
+  console.log("FajrTracker rendered");
+  console.log("Fajr entry data:", fajrEntry, selectedDate);
+  
 
   // Update state when data is fetched
   useEffect(() => {
@@ -27,6 +36,10 @@ export default function FajrTracker() {
   const handleToggle = (checked: boolean) => {
     setFajrPrayed(checked);
     fajrMutation.mutate({ prayed: checked });
+
+    console.log("Fajr prayer status updated:", checked);
+    console.log("Fajr entry:", fajrEntry);
+    
   };
 
   return (

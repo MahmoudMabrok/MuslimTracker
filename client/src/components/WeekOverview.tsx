@@ -1,10 +1,8 @@
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { useWeeklySummary, useCreateQuranEntry, useDeleteQuranEntry } from '@/hooks/useLocalStorage';
-import { DailySummary, QuranEntry } from '@/types/schema';
-import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { useWeeklySummary } from '@/hooks/useLocalStorage';
+import { DailySummary } from '@/types/schema';
+
 import { isSameDay, isToday } from '@/utils/dates';
 
 type WeekOverviewProps = {
@@ -36,7 +34,7 @@ export default function WeekOverview({ selectedDay, onDaySelect }: WeekOverviewP
         Weekly Overview
       </h2>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto">StatisticsPage
         <div className="inline-flex space-x-2 min-w-full pb-2">
           {isLoading ? (
             Array(7).fill(0).map((_, i) => (
