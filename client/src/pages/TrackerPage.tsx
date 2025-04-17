@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import QuranTracker from '@/components/QuranTracker';
 import FajrTracker from '@/components/FajrTracker';
+import WeekOverview from '@/components/WeekOverview';
 
 export const ID_COUNTER = "1327420/t/0";
 
@@ -26,6 +27,7 @@ export default function TrackerPage() {
 
   return (
     <main>
+      <WeekOverview />
       <QuranTracker />
       <FajrTracker />
     </main>
