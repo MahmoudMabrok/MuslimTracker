@@ -2,13 +2,17 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWeeklySummary, useCreateQuranEntry, useDeleteQuranEntry } from '@/hooks/useLocalStorage';
 import { DailySummary, QuranEntry } from '@/types/schema';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-export default function WeekOverview() {
+type WeekOverviewProps = {
+  selectedDay: DailySummary | null;
+  onDaySelect: (day: DailySummary | null) => void;
+};
+
+export default function WeekOverview({ selectedDay, onDaySelect }: WeekOverviewProps) {
   const { data: weekData = [], isLoading } = useWeeklySummary();
-  const [selectedDay, setSelectedDay] = useState<DailySummary | null>(null);
   const [newEntry, setNewEntry] = useState({ startPage: '', endPage: '' });
   
   const createEntry = useCreateQuranEntry();
@@ -87,7 +91,7 @@ export default function WeekOverview() {
                     ${future ? 'opacity-50' : ''}
                     ${isSelected ? 'ring-2 ring-primary' : ''}
                   `}
-                  onClick={() => !future && setSelectedDay(isSelected ? null : day)}
+                  onClick={() => !future && onDaySelect(isSelected ? null : day)}
                 >
                   <div className="text-xs text-gray-500">{dayName}</div>
                   <div className="text-sm font-bold">{dayNumber.toString().padStart(2, '0')}</div>

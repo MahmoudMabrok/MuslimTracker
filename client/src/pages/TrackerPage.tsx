@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-
+import { useEffect, useState } from 'react';
+import { DailySummary } from '@/types/schema';
 import QuranTracker from '@/components/QuranTracker';
 import FajrTracker from '@/components/FajrTracker';
 import WeekOverview from '@/components/WeekOverview';
@@ -7,6 +7,7 @@ import WeekOverview from '@/components/WeekOverview';
 export const ID_COUNTER = "1327420/t/0";
 
 export default function TrackerPage() {
+  const [selectedDay, setSelectedDay] = useState<DailySummary | null>(null);
 
   useEffect(() => {
     try {
@@ -25,10 +26,26 @@ export default function TrackerPage() {
 
   console.log("TrackerPage rendered");
 
+  useEffect(() => {
+    // Set today as selected day on initial load
+    const today = new Date();
+    setSelectedDay({
+      date: today,
+      totalPages: 0,
+      fajrPrayed: false,
+      entries: []
+    });
+  }, []);
+
   return (
     <main>
+<<<<<<< HEAD
       <WeekOverview />
       <QuranTracker />
+=======
+      <WeekOverview selectedDay={selectedDay} onDaySelect={setSelectedDay} />
+      <QuranTracker selectedDate={selectedDay?.date} />
+>>>>>>> 32a3cdd (Assistant checkpoint: Update components to share selected day state)
       <FajrTracker />
     </main>
   );
