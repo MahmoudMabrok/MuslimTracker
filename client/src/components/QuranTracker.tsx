@@ -75,7 +75,10 @@ export default function QuranTracker({ selectedDate }: QuranTrackerProps) {
       return;
     }
 
-    addEntryMutation.mutate(values);
+    addEntryMutation.mutate({
+      ...values,
+      date: selectedDate || new Date()
+    });
   };
 
   // Format time for display

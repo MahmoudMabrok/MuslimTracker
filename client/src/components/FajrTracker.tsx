@@ -35,7 +35,10 @@ export default function FajrTracker({ selectedDate }: FajrTrackerProps) {
 
   const handleToggle = (checked: boolean) => {
     setFajrPrayed(checked);
-    fajrMutation.mutate({ prayed: checked });
+    fajrMutation.mutate({ 
+      prayed: checked,
+      date: selectedDate || new Date()
+    });
 
     console.log("Fajr prayer status updated:", checked);
     console.log("Fajr entry:", fajrEntry);
