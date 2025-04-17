@@ -39,13 +39,8 @@ export default function TrackerPage() {
 
   return (
     <main>
-<<<<<<< HEAD
-      <WeekOverview />
-      <QuranTracker />
-=======
       <WeekOverview selectedDay={selectedDay} onDaySelect={setSelectedDay} />
       <QuranTracker selectedDate={selectedDay?.date} />
->>>>>>> 32a3cdd (Assistant checkpoint: Update components to share selected day state)
       <FajrTracker />
     </main>
   );

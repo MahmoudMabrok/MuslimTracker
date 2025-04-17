@@ -5,6 +5,7 @@ import { DailySummary, QuranEntry } from '@/types/schema';
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { isSameDay, isToday } from '@/utils/dates';
 
 type WeekOverviewProps = {
   selectedDay: DailySummary | null;
@@ -22,16 +23,6 @@ export default function WeekOverview({ selectedDay, onDaySelect }: WeekOverviewP
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     const dayNumber = date.getDate();
     return { dayName, dayNumber };
-  };
-
-  const isToday = (date: Date) => {
-    const today = new Date();
-    const compareDate = new Date(date);
-    return (
-      compareDate.getDate() === today.getDate() &&
-      compareDate.getMonth() === today.getMonth() &&
-      compareDate.getFullYear() === today.getFullYear()
-    );
   };
 
   const isFutureDate = (date: Date) => {
@@ -81,8 +72,7 @@ export default function WeekOverview({ selectedDay, onDaySelect }: WeekOverviewP
               const { dayName, dayNumber } = formatDayInfo(dateObj);
               const future = isFutureDate(dateObj);
               const current = isToday(dateObj);
-              const isSelected = selectedDay?.date.getTime() === dateObj.getTime();
-
+              const isSelected = isSameDay(selectedDay?.date, dateObj);
               return (
                 <div 
                   key={index}
