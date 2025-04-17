@@ -19,10 +19,11 @@ export default function WeekOverview() {
   // Check if date is today
   const isToday = (date: Date) => {
     const today = new Date();
+    const compareDate = new Date(date);
     return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
+      compareDate.getDate() === today.getDate() &&
+      compareDate.getMonth() === today.getMonth() &&
+      compareDate.getFullYear() === today.getFullYear()
     );
   };
 

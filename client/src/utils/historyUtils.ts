@@ -53,8 +53,9 @@ export const formatHistoryData = (
   const entriesByDate = new Map(
     historyData.map(entry => {
       const entryDate = new Date(entry.date);
-      entryDate.setHours(0, 0, 0, 0);
-      return [entryDate.toISOString().split('T')[0], entry];
+      // Keep original time for day grouping
+      const dateKey = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate());
+      return [dateKey.toISOString().split('T')[0], entry];
     })
   );
 
