@@ -1,22 +1,25 @@
+
 import { Skeleton } from '@/components/ui/skeleton';
-import { useWeeklySummary } from '@/hooks/useLocalStorage';
-import { DailySummary } from '@/types/schema';
-import DetailedEntryModal from './DetailedEntryModal';
+import { useWeeklySummary, useCreateQuranEntry, useDeleteQuranEntry } from '@/hooks/useLocalStorage';
+import { DailySummary, QuranEntry } from '@/types/schema';
 import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function WeekOverview() {
   const { data: weekData = [], isLoading } = useWeeklySummary();
   const [selectedDay, setSelectedDay] = useState<DailySummary | null>(null);
+  const [newEntry, setNewEntry] = useState({ startPage: '', endPage: '' });
+  
+  const createEntry = useCreateQuranEntry();
+  const deleteEntry = useDeleteQuranEntry();
 
-  // Format day name and date
   const formatDayInfo = (date: Date) => {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     const dayNumber = date.getDate();
-
     return { dayName, dayNumber };
   };
 
-  // Check if date is today
   const isToday = (date: Date) => {
     const today = new Date();
     const compareDate = new Date(date);
@@ -27,13 +30,26 @@ export default function WeekOverview() {
     );
   };
 
-  // Check if date is in the future
   const isFutureDate = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const dateCopy = new Date(date);
     dateCopy.setHours(0, 0, 0, 0);
     return dateCopy > today;
+  };
+
+  const handleAddEntry = () => {
+    if (!selectedDay) return;
+    const start = parseInt(newEntry.startPage);
+    const end = parseInt(newEntry.endPage);
+    if (isNaN(start) || isNaN(end) || start > end || start < 1 || end > 614) return;
+    
+    createEntry.mutate({
+      startPage: start,
+      endPage: end,
+      date: selectedDay.date
+    });
+    setNewEntry({ startPage: '', endPage: '' });
   };
 
   return (
@@ -46,7 +62,6 @@ export default function WeekOverview() {
       <div className="overflow-x-auto">
         <div className="inline-flex space-x-2 min-w-full pb-2">
           {isLoading ? (
-            // Skeleton loading state
             Array(7).fill(0).map((_, i) => (
               <div key={i} className="flex flex-col items-center min-w-[60px] p-2 border rounded">
                 <Skeleton className="h-4 w-12 mb-1" />
@@ -62,6 +77,7 @@ export default function WeekOverview() {
               const { dayName, dayNumber } = formatDayInfo(dateObj);
               const future = isFutureDate(dateObj);
               const current = isToday(dateObj);
+              const isSelected = selectedDay?.date.getTime() === dateObj.getTime();
 
               return (
                 <div 
@@ -69,8 +85,9 @@ export default function WeekOverview() {
                   className={`flex flex-col items-center min-w-[60px] p-2 border rounded cursor-pointer
                     ${current ? 'bg-neutral-light font-bold' : ''}
                     ${future ? 'opacity-50' : ''}
+                    ${isSelected ? 'ring-2 ring-primary' : ''}
                   `}
-                  onClick={() => setSelectedDay(day)}
+                  onClick={() => !future && setSelectedDay(isSelected ? null : day)}
                 >
                   <div className="text-xs text-gray-500">{dayName}</div>
                   <div className="text-sm font-bold">{dayNumber.toString().padStart(2, '0')}</div>
@@ -101,7 +118,49 @@ export default function WeekOverview() {
           )}
         </div>
       </div>
-      {selectedDay && <DetailedEntryModal day={selectedDay} onClose={() => setSelectedDay(null)} />}
+
+      {selectedDay && (
+        <div className="mt-4 border-t pt-4">
+          <h3 className="font-medium mb-2">
+            Quran Entries for {selectedDay.date.toLocaleDateString()}
+          </h3>
+          
+          <div className="flex gap-2 mb-4">
+            <Input
+              type="number"
+              placeholder="Start Page"
+              value={newEntry.startPage}
+              onChange={(e) => setNewEntry(prev => ({ ...prev, startPage: e.target.value }))}
+              className="w-24"
+            />
+            <Input
+              type="number"
+              placeholder="End Page"
+              value={newEntry.endPage}
+              onChange={(e) => setNewEntry(prev => ({ ...prev, endPage: e.target.value }))}
+              className="w-24"
+            />
+            <Button onClick={handleAddEntry} disabled={createEntry.isPending}>
+              Add Entry
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            {selectedDay.entries.map((entry: QuranEntry) => (
+              <div key={entry.id} className="flex justify-between items-center bg-neutral-medium/50 p-2 rounded">
+                <span>Pages {entry.startPage}-{entry.endPage}</span>
+                <button
+                  onClick={() => deleteEntry.mutate(entry.id)}
+                  disabled={deleteEntry.isPending}
+                  className="text-status-error"
+                >
+                  <span className="material-icons text-sm">delete</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
