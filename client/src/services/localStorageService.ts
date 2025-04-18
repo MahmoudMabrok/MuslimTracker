@@ -1,3 +1,4 @@
+import { log } from 'node:console';
 import { 
   User, QuranEntry, FajrEntry, Achievement, 
   InsertQuranEntry, InsertFajrEntry, InsertAchievement, 
@@ -127,14 +128,36 @@ export const getUser = async (): Promise<User> => {
 export const createQuranEntry = async (entry: InsertQuranEntry): Promise<QuranEntry> => {
   initializeStorage();
   const entries: QuranEntry[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.QURAN_ENTRIES) || '[]');
-  
-  const newEntry: QuranEntry = {
-    ...entry,
-    id: Date.now(), // Use timestamp as unique ID
-    date: new Date().toISOString(), // Store current date
-  };
-  
-  entries.push(newEntry);
+
+   // Use entry.date instead of today
+   const entryDate = entry.date ? new Date(entry.date) : new Date();
+   const existingEntryIndex = entries.findIndex(e => {
+     const existingDate = new Date(e.date);
+     console.log("Checking entry date:", existingDate, "against entry date:", entryDate);
+     
+     return isSameDay(existingDate, entryDate) && e.userId === entry.userId;
+   });
+   
+   let newEntry: QuranEntry;
+   
+   if (existingEntryIndex >= 0) {
+     // Update existing entry
+     newEntry = {
+       ...entries[existingEntryIndex],
+       startPage: entry.startPage,
+       endPage: entry.endPage,
+     };
+     entries[existingEntryIndex] = newEntry;
+   } else {
+     // Create new entry
+     newEntry = {
+       ...entry,
+       id: entryDate.getTime(), // Use timestamp as unique ID
+       date: entry.date, // Use provided date instead of current date
+     };
+     entries.push(newEntry);
+   }
+
   localStorage.setItem(STORAGE_KEYS.QURAN_ENTRIES, JSON.stringify(entries));
   
   // Update achievements after adding entry
@@ -186,11 +209,13 @@ export const createFajrEntry = async (entry: InsertFajrEntry): Promise<FajrEntry
   initializeStorage();
   const entries: FajrEntry[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.FAJR_ENTRIES) || '[]');
   
-  // Check if entry for today already exists
-  const today = new Date();
+  // Use entry.date instead of today
+  const entryDate = new Date(entry.date);
   const existingEntryIndex = entries.findIndex(e => {
-    const entryDate = new Date(e.date);
-    return isSameDay(entryDate, today) && e.userId === entry.userId;
+    const existingDate = new Date(e.date);
+    console.log("Checking entry date:", existingDate, "against entry date:", entryDate);
+    
+    return isSameDay(existingDate, entryDate) && e.userId === entry.userId;
   });
   
   let newEntry: FajrEntry;
@@ -206,8 +231,8 @@ export const createFajrEntry = async (entry: InsertFajrEntry): Promise<FajrEntry
     // Create new entry
     newEntry = {
       ...entry,
-      id: Date.now(), // Use timestamp as unique ID
-      date: new Date().toISOString(), // Store current date
+      id: entryDate.getTime(), // Use timestamp as unique ID
+      date: entry.date, // Use provided date instead of current date
     };
     entries.push(newEntry);
   }
@@ -225,12 +250,17 @@ export const getFajrEntries = async (): Promise<FajrEntry[]> => {
   return JSON.parse(localStorage.getItem(STORAGE_KEYS.FAJR_ENTRIES) || '[]');
 };
 
-export const getFajrEntryByDate = async (date: Date): Promise<FajrEntry | undefined> => {
+export const getFajrEntryByDate = async (date: Date): Promise<FajrEntry | null> => {
   const entries = await getFajrEntries();
+
+  console.log("Fajr entries:", entries);
+  console.log("Date to check:", date);
+  
+
   return entries.find(entry => {
     const entryDate = new Date(entry.date);
     return isSameDay(entryDate, date);
-  });
+  }) || null ;
 };
 
 export const getFajrEntriesByDateRange = async (startDate: Date, endDate: Date): Promise<FajrEntry[]> => {

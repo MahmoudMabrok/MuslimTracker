@@ -20,7 +20,7 @@ export default function FajrTracker({ selectedDate }: FajrTrackerProps) {
   const { data: fajrEntry, isLoading } = useFajrEntry(selectedDate || today);
 
   console.log("FajrTracker rendered");
-  console.log("Fajr entry data:", fajrEntry, selectedDate);
+  console.log("Fajr entry data:", fajrEntry, selectedDate?.getDay());
   
 
   // Update state when data is fetched
@@ -40,8 +40,7 @@ export default function FajrTracker({ selectedDate }: FajrTrackerProps) {
       date: selectedDate || new Date()
     });
 
-    console.log("Fajr prayer status updated:", checked);
-    console.log("Fajr entry:", fajrEntry);
+    console.log("Fajr prayer status updated:", checked, selectedDate?.getMilliseconds());
     
   };
 

@@ -18,7 +18,7 @@ export const quranEntrySchema = z.object({
 });
 
 export type QuranEntry = z.infer<typeof quranEntrySchema>;
-export type InsertQuranEntry = Omit<QuranEntry, 'id' | 'date'>;
+export type InsertQuranEntry = QuranEntry;
 
 // Fajr entry schema
 export const fajrEntrySchema = z.object({
@@ -29,7 +29,7 @@ export const fajrEntrySchema = z.object({
 });
 
 export type FajrEntry = z.infer<typeof fajrEntrySchema>;
-export type InsertFajrEntry = Omit<FajrEntry, 'id' | 'date'>;
+export type InsertFajrEntry = FajrEntry;
 
 // Achievement schema
 export const achievementSchema = z.object({
